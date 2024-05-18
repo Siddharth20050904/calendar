@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up</title>
+<link rel="stylesheet" href="signup.css">
+
+</head>
+<body>
+<div class="form-container">
+    <h2>Sign Up</h2>
+    <form action="/signup" method="post">
+        <input type="text" name="name" placeholder="Name" id="name"required>
+        <input type="text" name="rollno" placeholder="Roll No." id="roll" required>
+        <input type="email" name="email" placeholder="Email" id="mail" required>
+        <select name="branch" id="branch" required>
+            <option value="" disabled selected>Select Branch</option>
+            <option value="CSE">Computer Science</option>
+            <option value="EE">Electrical</option>
+            <option value="ME">Mechanical Engineering</option>
+            <option value="MnC">Mathematics and Computing</option>
+        </select>
+        <input type="password" name="password" placeholder="Password" id="pass" required>
+        <input type="password" name="confirmPassword" placeholder="Confirm Password" id="con_pass" required>
+        <input type="submit" value="Sign Up" onclick="verifyPassword()" id="butt">
+    </form>
+    <p>Already have an account? <a href="/login">Sign In</a></p>
+</div>
+<script>
+    // function to verify if password and confirm password are same
+    function verifyPassword(){
+        var password = document.getElementsByName('password').values[0];
+        var confirmPassword = document.getElementsByName('confirmPassword').values[0];
+
+        if(password!=confirmPassword){
+            alert("Please enter same password in Confirm Password");
+        }
+    }
+</script>
+</body>
+</html>
