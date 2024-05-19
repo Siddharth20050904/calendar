@@ -1,6 +1,6 @@
 // importing required modules and functions
 const express = require("express");
-const month = require("./myModules/getMonth"); // importing custom module for getting the current month
+const fetchMonths = require("./myModules/getMonth"); // importing custom module for getting the current month
 const bodyParser = require("body-parser");
 const { LogInCollection, Event } = require("./myModules/mongod"); // importing MongoDB models
 const monthName = ["January","February","March","April","May","June","July","August","September","October","November","December"]; // array for month names
@@ -48,56 +48,64 @@ app.get("/",(req,res)=>{
 
 // route for home page
 app.route('/home')
-.get((req,res)=>{
-    if(req.isAuthenticated()){
-        // calling getMonthFunc() function from local library
-        month.getmonthFunc().then((data) => {
-            // finding the month from mongodb
-            Event.find({month:monthName.indexOf(Object.keys(data)[0])+1}).then((result)=>{
-                if(data){
-                    //rendering home page with passing following data
-                    res.render("home",{
-                        currentMonth : Object.keys(data)[0],
-                        currentDays : data[Object.keys(data)[0]],
-                        currentYear:data["year"],
-                        events: JSON.stringify(result),
-                        monthNo:monthName.indexOf(Object.keys(data)[0])+1,
-                        user: req.user
-                    });
-                }
-            });
-        });
-    }else{
-        res.redirect("/login");
-    } 
-})
-.post(async (req,res)=>{
-    if(req.isAuthenticated()){
-        if(req.body.button != null){
-            month.getmonthFunc(req.body.button).then((data) => {
-                Event.find({month:monthName.indexOf(Object.keys(data)[0])+1}).then((result)=>{
-                    if(data){
-                        res.render("home",{
-                            currentMonth : Object.keys(data)[0],
-                            currentDays : data[Object.keys(data)[0]],
-                            currentYear:data["year"],
-                            events: JSON.stringify(result),
-                            monthNo:monthName.indexOf(Object.keys(data)[0])+1,
-                            user: req.user
-                        });
-                    }
+.get((req, res) => {
+    if (req.isAuthenticated()) {
+        const data = [];
+        
+        async function fetchAndRender() {
+            try {
+                // Fetching months data
+                const result = await fetchMonths();
+                data.push(...result);
+
+                // Using a Set to avoid duplicate events
+                const eventSet = new Set();
+
+                // Creating promises for events
+                const eventPromises = result.map(async (ele) => {
+                    const year = ele["year"];
+                    const month = Object.keys(ele)[0];
+                    const events = await Event.find({ month: month, year: year });
+                    events.forEach(event => eventSet.add(JSON.stringify(event)));  // Convert to JSON string to ensure uniqueness
                 });
-            });
-        }else{
-            await Event.deleteOne({_id:req.body.delete});
-            res.redirect('/');
+
+                // Resolving all event promises
+                await Promise.all(eventPromises);
+
+                // Converting the set back to an array
+                const eve = Array.from(eventSet).map(eventStr => JSON.parse(eventStr));
+
+                // Logging the events
+                console.log(eve);
+
+                // Rendering the response
+                res.render("home", {
+                    events: JSON.stringify(eve),
+                    data: data,
+                    user: req.user
+                });
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                res.status(500).send("Internal Server Error");
+            }
         }
+
+        // Call the async function to fetch data and render the response
+        fetchAndRender();
+    } else {
+        res.redirect('/login'); // Redirect to login if not authenticated
+    }
+})
+.post(async(req,res)=>{
+    if(req.isAuthenticated()){
+        await Event.deleteOne({_id:req.body.delete});
+            res.redirect('/');
     }else{
         res.redirect("/login");
     }
-});
+})
 
-// route for about page
+
 app.route('/about')
 .get((req,res)=>{
     if(req.isAuthenticated()){
@@ -124,7 +132,7 @@ app.route('/edit')
     const event = Event({
         eventType: req.body.eventType,
         year: Number(req.body.eventDate.substr(0,4)),
-        month: Number(req.body.eventDate.substr(5,2)),
+        month: monthName[req.body.eventDate.substr(5,2)-1],
         date: Number(req.body.eventDate.substr(8,2)),
         eventTitle: req.body.eventTitle.replace(/'/g,"#").replace(/"/g,"~"), // replacing special characters
         eventDescription: req.body.eventDescription.replace(/'/g,"#").replace(/"/g,"~"), // replacing special characters

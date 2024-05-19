@@ -7,7 +7,7 @@ main();
 const eventSchema = mongoose.Schema({
   eventType: String,
   year:Number,
-  month:Number,
+  month:String,
   date:Number,
   eventTitle: String,
   eventDescription: String,

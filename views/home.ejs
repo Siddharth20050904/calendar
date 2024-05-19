@@ -79,137 +79,117 @@
       </div>
     </div>
   </nav>
-  
-  <!-- Content -->
   <div class="content">
-    <div class="calendar">
-      <!-- Month and year display -->
-      <div class="month"><h3><%= currentMonth %> <%= currentYear %></h3></div>
-      
-      <!-- Days of the week -->
-      <div class="days">
-          <div class="day"><h4>Sun</h4></div>
-          <div class="day"><h4>Mon</h4></div>
-          <div class="day"><h4>Tue</h4></div>
-          <div class="day"><h4>Wed</h4></div>
-          <div class="day"><h4>Thu</h4></div>
-          <div class="day"><h4>Fri</h4></div>
-          <div class="day"><h4>Sat</h4></div>
-          
-          <!-- Rendering days of the month -->
-          <% currentDays.forEach((week)=>{ %>
-          <%   week.forEach((day)=>{ %>
-          <%    if(day!=0){ %>
-                <div class="day <%=currentYear%>-<%= monthNo %>-<%= day %> text-truncate" onclick="showPopup('popup-<%=currentYear%>-<%= monthNo %>-<%= day %>')"><h5 class="title-<%=currentYear%>-<%= monthNo %>-<%= day %>"><%=day%></h5></div>
-          <%      }else{ %>
-                <div class="day"></div>
-                <%} %>
-                <%}) %>
-                <%}) %>
+  <% for(i=-4;i<5;i++){ %>
+    <% let c = data.find(ele=>ele.id===i)%>
+    <% currentMonth = Object.keys(c)[0] %>
+    <% currentYear = c["year"] %>
+      <div class="calendar content-<%=i%>">
+  
+        <div class="month"><h3><%= currentMonth %> <%= currentYear %></h3></div>
+        
+        <div class="days">
+            <div class="day"><h4>Sun</h4></div>
+            <div class="day"><h4>Mon</h4></div>
+            <div class="day"><h4>Tue</h4></div>
+            <div class="day"><h4>Wed</h4></div>
+            <div class="day"><h4>Thu</h4></div>
+            <div class="day"><h4>Fri</h4></div>
+            <div class="day"><h4>Sat</h4></div>
+            
+            <% c[Object.keys(c)[0]].forEach((week)=>{ %>
+            <%   week.forEach((day)=>{ %>
+            <%    if(day!=0){ %>
+                  <div class="day <%=currentYear%>-<%= currentMonth %>-<%= day %> text-truncate" onclick="showPopup('popup-<%=currentYear%>-<%= currentMonth %>-<%= day %>')"><h5 class="title-<%=currentYear%>-<%= currentMonth %>-<%= day %>"><%=day%></h5></div>
+            <%      }else{ %>
+                  <div class="day"></div>
+                  <%} %>
+                  <%}) %>
+                  <%}) %>
+        </div>
       </div>
-    </div>
 
-    <!-- Arrow buttons -->
-    <div class="arrow-content">
-      <div class="form1">
-        <form method="post">
-          <button type="submit" name="button" class="up" value="up"></button>
-          <div class="current-month"><label class="month" style="color:black"><%=currentMonth%></label></div>         
-          <button type="submit" name="button" class="down" value="down"></button>
-        </form>
-      </div> 
-      <!-- Edit button (visible only for staff users) -->
-      <div class="form2">
-        <% if (user.userType=="staff") { %>
-          <div class="edit-btn">
-            <a href="/edit">
-                <div><b>Edit</b></div>
-                <div class="edit"></div>
-            </a>
-          </div>
-        <% } %>
-      </div>
-    </div>
-
-    <!-- Popup for event details -->
-    <% const e = JSON.parse(events) %>
-    <% currentDays.forEach((week)=>{ %>
-      <% week.forEach((day)=>{ %>
-        <% if(day!=0){ %> 
-          <% const arr = e.filter(obj=>{%>
-            <% if(obj['date']!=day){%>
-              <% return false;%>
-            <% }else if(obj['month']==currentMonth){%>
-              <% return false;%>
-            <% }else if(obj['year']!=currentYear){%>
-              <% return false; %>
-            <% } %>
-            <% return true;%>
-          <% })%>
-          <% if (arr.length>0){ %>
-            <div id="popup-<%=currentYear%>-<%= monthNo %>-<%= day %>" class="popup">
-              <div class="popup-content">
-                <span class="close" onclick="closePopup('popup-<%=currentYear%>-<%= monthNo %>-<%= day %>')">&times;</span>
-                <h2>Event Details</h2>
-                <!-- Displaying event details -->
-                <form method="post">
-                  <label for="date">Date: <%= day %>-<%= monthNo %>-<%=currentYear%></label>
-                  <% arr.forEach(ele=>{ %>
-                    <hr>
-                    <div class="event-type">
-                      <label>Event Type : <%= ele.eventType %></label><br>
-                    </div>
-                    <table>
-                      <tr>
-                        <th>Event : <%= ele.eventTitle.replace(/#/g,"'").replace(/~/g,'"') %></th>
-                      </tr>
-                      <tr>
-                        <th>Description : <%= ele.eventDescription.replace(/#/g,"'").replace(/~/g,'"') %></th>
-                      </tr>
-                      <tr>
-                        <th>By Faculty : <%= ele.faculty_name %></th>
-                      </tr>
-                    </table>
-                    <!-- Delete button (visible only for staff users and event creators) -->
-                    <% if(user.userType=="staff" && ele.faculty_email==user.email) {%>
-                    <button type="submit" class= "submit-btn" name="delete" value="<%=ele._id%>"> Delete </button>
-                    <%}%>
-                  <% }) %>
-                </form>
+      <% const e = JSON.parse(events) %>
+      <% c[Object.keys(c)[0]].forEach((week)=>{ %>
+        <% week.forEach((day)=>{ %>
+          <% if(day!=0){ %> 
+            <% const arr = e.filter(obj=>{%>
+              <% if(obj['date']!=day){%>
+                <% return false;%>
+              <% }else if(obj['month']!=currentMonth){%>
+                <% return false;%>
+              <% }else if(obj['year']!=currentYear){%>
+                <% return false; %>
+              <% } %>
+              <% return true;%>
+            <% })%>
+            <% if (arr.length>0){ %>
+              <div id="popup-<%=currentYear%>-<%= currentMonth %>-<%= day %>" class="popup">
+                <div class="popup-content">
+                  <span class="close" onclick="closePopup('popup-<%=currentYear%>-<%= currentMonth %>-<%= day %>')">&times;</span>
+                  <h2>Event Details</h2>
+                  <form method="post">
+                    <label for="date">Date: <%= day %>-<%= currentMonth %>-<%=currentYear%></label>
+                    <% arr.forEach(ele=>{ %>
+                      <hr>
+                      <div class="event-type">
+                        <label>Event Type : <%= ele.eventType %></label><br>
+                      </div>
+                      <table>
+                        <tr>
+                          <th>Event : <%= ele.eventTitle.replace(/#/g,"'").replace(/~/g,'"') %></th>
+                        </tr>
+                        <tr>
+                          <th>Description : <%= ele.eventDescription.replace(/#/g,"'").replace(/~/g,'"') %></th>
+                        </tr>
+                        <tr>
+                          <th>By Faculty : <%= ele.faculty_name %></th>
+                        </tr>
+                      </table>
+                      <% if(user.userType=="staff" && ele.faculty_email==user.email) {%>
+                      <button type="submit" class= "submit-btn" name="delete" value="<%=ele._id%>"> Delete </button>
+                      <%}%>
+                    <% }) %>
+                  </form>
+                </div>
               </div>
-            </div>
+            <% } %>
           <% } %>
-        <% } %>
+        <% }) %>
       <% }) %>
-    <% }) %>
+      
+
     
+    <% } %>
+  <div class="arrow-content">
+    <div class="form1">
+      <button onclick="lastMonth()" class="up" id="up"></button>         
+    <button onclick="nextMonth()" class="down" id="down"></button>
+    </div>
+     
+    <div class="form2">
+      <% if (user.userType=="staff") { %>
+        <div class="edit-btn">
+          <a href="/edit">
+            <div><b>Edit</b></div>
+            <div class="edit"></div>
+          </a>
+        </div>
+      <% } %>
+    </div>
+  </div>
+  </div>
+
+ 
+    
+
+
+  
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   
   <!-- JavaScript -->
-  <script>
-    // Parsing events data
-    const events = JSON.parse('<%- events %>');
-    // Looping through events
-    events.forEach(event => {
-      // Updating day titles with event details
-      document.getElementsByClassName(`title-${event.year}-${event.month}-${event.date}`)[0].innerHTML = `${event.date} ${event.eventTitle.replace(/#/g,"'").replace(/~/g,'"')}`;  
-      // Setting background color based on event type
-      if(event.eventType=="exam"){
-        document.getElementsByClassName(`${event.year}-${event.month}-${event.date}`)[0].style.backgroundColor = "red";
-      }else{
-        document.getElementsByClassName(`${event.year}-${event.month}-${event.date}`)[0].style.backgroundColor = "gold";
-      }
-    });
-    // Function to show popup
-    function showPopup(d) {
-      document.getElementById(d).style.display = 'block';
-    }
-    // Function to close popup
-    function closePopup(d) {
-      document.getElementById(d).style.display = 'none';
-  }
-  </script>
+  
   <footer style="background-color: rgb(31,36,33);">
     <img id="image" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTpOr24GGFIDW0neymjTHQN6SlA9YgzbkSWEes40ztmRA&s" alt="Image">
       <div id="text"> <b>Spring Semester</b>
@@ -217,6 +197,56 @@
       </div>
       <div id="clock"></div>
     </footer>
+
+    <script>
+      // Parsing events data
+      const events = JSON.parse('<%- events %>');
+      // Looping through events
+      events.forEach(event => {
+        if(event){
+          // Updating day titles with event details
+        document.getElementsByClassName(`title-${event.year}-${event.month}-${event.date}`)[0].innerHTML = `${event.date} ${event.eventTitle.replace(/#/g,"'").replace(/~/g,'"')}`;  
+        // Setting background color based on event type
+        if(event.eventType=="exam"){
+          document.getElementsByClassName(`${event.year}-${event.month}-${event.date}`)[0].style.backgroundColor = "red";
+        }else{
+          document.getElementsByClassName(`${event.year}-${event.month}-${event.date}`)[0].style.backgroundColor = "gold";
+        }
+        }
+      });
+      document.getElementsByClassName('content-0')[0].style.display="block";
+      var i=0;
+      function nextMonth(){
+        document.getElementsByClassName(`content-${i}`)[0].style.display="none";
+        i++;
+        document.getElementsByClassName(`content-${i}`)[0].style.display="block";
+        if(i>3){
+          document.getElementById("down").style.display="none";
+        }else{
+          document.getElementById("down").style.display="block";
+          document.getElementById("up").style.display="block";
+        }
+      }
+      function lastMonth(){
+        document.getElementsByClassName(`content-${i}`)[0].style.display="none";
+        i--;
+        document.getElementsByClassName(`content-${i}`)[0].style.display="block";
+        if(i<-3){
+          document.getElementById("up").style.display="none";
+        }else{
+          document.getElementById("up").style.display="block";
+          document.getElementById("down").style.display="block";
+        }
+      }
+      // Function to show popup
+      function showPopup(d) {
+        document.getElementById(d).style.display = 'block';
+      }
+      // Function to close popup
+      function closePopup(d) {
+        document.getElementById(d).style.display = 'none';
+    }
+    </script>
     <script>
       function updateClock() {
         const now = new Date();

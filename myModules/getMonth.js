@@ -1,37 +1,45 @@
 const axios = require("axios");
-var n=0;
-const month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+const m = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const d = new Date();
-var year = d.getFullYear();
+const year = d.getFullYear();
+const month = d.getMonth();
+const months = [];
 
-function getmonthFunc(no) {
-    return new Promise((resolve, reject) => {
-        if(no=="up"){
-            n=n-1;
-        }
-        if(no=="down"){
-            n=n+1;
-        }
-        
-        
-        if(d.getMonth()+n<0){
-            year-=1;
-            n=11-d.getMonth();
-            
-        }else if(d.getMonth()+n>11){
-            year+=1;
-            n=-d.getMonth();
+async function fetchMonths() {
+    const promises = [];
+    for (let i = -4; i < 5; i++) {
+        let currentYear;
+        let monthIndex;
+
+        if (month + i < 0) {
+            currentYear = year - 1;
+            monthIndex = 12 + (month + i);
+        } else if (month + i >= 12) {
+            currentYear = year + 1;
+            monthIndex = (month + i) % 12;
+        } else {
+            currentYear = year;
+            monthIndex = month + i;
         }
 
-        let name = month[d.getMonth()+n];
-        axios.get("https://calendar-json-app.adaptable.app/month/"+name+`?year=${year}`)
-            .then((response) => {
-                resolve(response.data);
-            })
-            .catch((err) => {
-                reject(err);
-            });
-    });
+        const monthName = m[monthIndex];
+
+        promises.push(
+            axios.get(`https://calendar-json-app.adaptable.app/month/${monthName}?year=${currentYear}`)
+                .then((response) => {
+                    response.data["id"]=i;
+                    months.push(response.data);
+                })
+                .catch((err) => {
+                    console.error(`Error fetching data for ${monthName} ${currentYear}:`, err);
+                })
+        );
+    }
+
+    await Promise.all(promises);
+    return months;
 }
 
-module.exports = { getmonthFunc };
+fetchMonths()
+module.exports = fetchMonths;

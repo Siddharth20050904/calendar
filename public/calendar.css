@@ -22,6 +22,7 @@
     border-radius: 10px;
     padding: 10px;
     background-color: #1F2421;
+    display: none;
 }
 .month {
     text-align: center;
@@ -240,6 +241,11 @@ th {
     margin-top: 5px;
 }
 
+.arrow-content{
+    display: flex;
+    flex-direction: row;
+}
+
 
 @media screen and (max-width: 600px) {
     .popup-content {
@@ -262,6 +268,7 @@ th {
     .content{
         display: flex;
         flex-direction: column;
+        visibility: none;
     }
     .arrow-content{
         display: flex;
